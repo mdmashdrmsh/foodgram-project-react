@@ -130,3 +130,13 @@ dmypy.json
 
 # .idea
 .idea
+
+# Миграции
+migrations/
+
+# Статика и медиа
+media/
+static/
+
+# VSCode
+.vscode/
