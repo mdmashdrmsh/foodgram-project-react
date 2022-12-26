@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework.serializers import (ModelSerializer, SerializerMethodField,
                                         ValidationError)
@@ -216,6 +217,7 @@ class RecipeSerializer(ModelSerializer):
             return False
         return user.shopping_list.filter(id=recipe.id).exists()
 
+    @transaction.atomic
     def validate(self, data):
         """
         Проверка вводных данных data при создании и изменении рецепта.
@@ -255,6 +257,7 @@ class RecipeSerializer(ModelSerializer):
         data['author'] = self.context.get('request').user
         return data
 
+    @transaction.atomic
     def create(self, validated_data):
         """
         Создание рецепта.
@@ -267,6 +270,7 @@ class RecipeSerializer(ModelSerializer):
         enter_ingredient_amount_in_recipe(recipe, ingredients)
         return recipe
 
+    @transaction.atomic
     def update(self, recipe, validated_data):
         """
         Обновление рецепт.
