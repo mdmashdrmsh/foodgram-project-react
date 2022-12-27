@@ -1,5 +1,6 @@
 from colorfield.fields import ColorField
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import (MaxValueValidator, MinValueValidator,
+                                    MaxLengthValidator, MinLengthValidator)
 from django.db import models
 
 from users.models import User
@@ -78,7 +79,16 @@ class Recipe(models.Model):
         verbose_name='Изображение блюда',
     )
     text = models.TextField(
-        max_length=1000,
+        validators=(
+            MinLengthValidator(
+                10,
+                'Дайте краткое описание рецепта'
+            ),
+            MaxLengthValidator(
+                1000,
+                'Слишком длинное описание рецепта'
+            ),
+        )
         verbose_name='Текстовое описание рецепта',
         help_text='Введите текстовое описание рецепта',
     )
