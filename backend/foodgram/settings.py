@@ -1,9 +1,9 @@
 import os
 from pathlib import Path
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 
 
-# load_dotenv()
+load_dotenv()
 
 BASE_DIR = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 LOAD_INGR_PATH = BASE_DIR / "data" / "ingredients.csv"
@@ -13,7 +13,7 @@ SECRET_KEY = os.getenv(
     default="pbw$l)zud1l@wu@bpn*q$)5j0bvua2z)telfk(#e#3wd_&u(4"
 )
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -26,18 +26,19 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'rest_framework.authtoken',
     'djoser',
-    'colorfield',
     'corsheaders',
+    'rest_framework.authtoken',
     'api.apps.ApiConfig',
     'recipes.apps.RecipesConfig',
     'users.apps.UsersConfig',
+    'colorfield',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -70,6 +71,12 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        # 'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
+        # 'NAME': os.getenv('DB_NAME', default='postgres'),
+        # 'USER': os.getenv('POSTGRES_USER', default='postgres'),
+        # 'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='postgres'),
+        # 'HOST': os.getenv('DB_HOST', default='db'),
+        # 'PORT': os.getenv('DB_PORT', default=5432)
     }
 }
 
@@ -136,7 +143,7 @@ DJOSER = {
     },
 }
 
-CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_ALLOW_ALL = True
 CORS_URLS_REGEX = r'^/api/.*$'
 
 CORS_ALLOWED_ORIGINS = [
