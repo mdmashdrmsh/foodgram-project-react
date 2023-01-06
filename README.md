@@ -1,1 +1,2 @@
-# praktikum_new_diplom
+# Foodgram
+[![example event parameter](https://github.com/mdmashdrmsh/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)](https://github.com/mdmashdrmsh/foodgram-project-react/actions/workflows/foodgram_workflow.yml)
