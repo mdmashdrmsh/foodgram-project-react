@@ -88,7 +88,7 @@ class IngredientViewSet(ReadOnlyModelViewSet):
             if name[0] == '%':
                 name = unquote(name)
             name = name.lower()
-            stw_queryset = list(queryset.filter(name__startwith=name))
+            stw_queryset = list(queryset.filter(name__startswith=name))
             cnt_queryset = queryset.filter(name__contains=name)
             stw_queryset.extend(
                 [i for i in cnt_queryset if i not in stw_queryset]

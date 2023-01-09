@@ -66,7 +66,7 @@ class UserSerializer(ModelSerializer):
         user.save()
         return user
 
-    def validated_username(self, username):
+    def validate_username(self, username):
         """
         Проверяет введённый логин username.
         """
