@@ -136,6 +136,12 @@ class RecipeViewSet(ModelViewSet, AddDelViewMixin):
         if is_in_shopping in ('1', 'true',):
             queryset = queryset.filter(is_in_shoppong_list=user.id)
         elif is_in_shopping in ('0', 'false',):
+            queryset = queryset.exclude(is_in_shopping_list=user.id)
+
+        is_favorited = self.request.query_params.get('is_favorited')
+        if is_favorited in ('1', 'true',):
+            queryset = queryset.filter(is_favorite=user.id)
+        if is_favorited in ('0', 'false',):
             queryset = queryset.exclude(is_favorite=user.id)
 
         return queryset
