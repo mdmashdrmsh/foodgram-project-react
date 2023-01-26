@@ -4,6 +4,7 @@ from urllib.parse import unquote
 from django.contrib.auth import get_user_model
 from django.db.models import F, Sum
 from django.http.response import HttpResponse
+from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -12,6 +13,7 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from recipes.models import Ingredient, IngredientAmount, Recipe, Tag
 
+from .filters import IngredientsFilter, RecipeFilter
 from .mixins import AddDelViewMixin
 from .paginators import PageLimitPagination
 from .permissions import IsAdminOrReadOnly, IsAuthorStaffOrReadOnly
@@ -72,29 +74,30 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     """
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    filterset_class = IngredientsFilter
     permission_classes = (IsAdminOrReadOnly,)
 
-    def get_queryset(self):
-        """
-        Получает queryset в соответствии с параметрами запроса.
-        Ищет объекты по совпадению в начале названия,
-        также добавляются результаты по совпадению в середине.
-        Прописные буквы преобразуются в строчные,
-        так как все ингредиенты в базе даны в нижнем регистре.
-        """
-        name = self.request.query_params.get('name')
-        queryset = self.queryset
-        if name:
-            if name[0] == '%':
-                name = unquote(name)
-            name = name.lower()
-            stw_queryset = list(queryset.filter(name__startswith=name))
-            cnt_queryset = queryset.filter(name__contains=name)
-            stw_queryset.extend(
-                [i for i in cnt_queryset if i not in stw_queryset]
-            )
-            queryset = stw_queryset
-        return queryset
+    # def get_queryset(self):
+    #     """
+    #     Получает queryset в соответствии с параметрами запроса.
+    #     Ищет объекты по совпадению в начале названия,
+    #     также добавляются результаты по совпадению в середине.
+    #     Прописные буквы преобразуются в строчные,
+    #     так как все ингредиенты в базе даны в нижнем регистре.
+    #     """
+    #     name = self.request.query_params.get('name')
+    #     queryset = self.queryset
+    #     if name:
+    #         if name[0] == '%':
+    #             name = unquote(name)
+    #         name = name.lower()
+    #         stw_queryset = list(queryset.filter(name__startswith=name))
+    #         cnt_queryset = queryset.filter(name__contains=name)
+    #         stw_queryset.extend(
+    #             [i for i in cnt_queryset if i not in stw_queryset]
+    #         )
+    #         queryset = stw_queryset
+    #     return queryset
 
 
 class RecipeViewSet(ModelViewSet, AddDelViewMixin):
@@ -110,6 +113,8 @@ class RecipeViewSet(ModelViewSet, AddDelViewMixin):
     queryset = Recipe.objects.select_related('author')
     serializer_class = RecipeSerializer
     permission_classes = (IsAuthorStaffOrReadOnly,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RecipeFilter
     pagination_class = PageLimitPagination
     add_serializer = ShortRecipeSerializer
 
@@ -134,7 +139,7 @@ class RecipeViewSet(ModelViewSet, AddDelViewMixin):
 
         is_in_shopping = self.request.query_params.get('is_in_shopping_cart')
         if is_in_shopping in ('1', 'true',):
-            queryset = queryset.filter(is_in_shoppong_list=user.id)
+            queryset = queryset.filter(is_in_shopping_list=user.id)
         elif is_in_shopping in ('0', 'false',):
             queryset = queryset.exclude(is_in_shopping_list=user.id)
 
