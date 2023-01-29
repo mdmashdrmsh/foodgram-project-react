@@ -152,8 +152,8 @@ class IngredientSerializer(ModelSerializer):
     """
     class Meta:
         model = Ingredient
-        fields = '__all__'
-        read_only_fields = '__all__',
+        fields = 'name'
+        read_only_fields = 'name',
 
 
 class RecipeSerializer(ModelSerializer):
