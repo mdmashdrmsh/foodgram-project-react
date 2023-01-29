@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from django.db.models import F
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework.serializers import (ModelSerializer, SerializerMethodField,
                                         ValidationError)
@@ -152,8 +153,8 @@ class IngredientSerializer(ModelSerializer):
     """
     class Meta:
         model = Ingredient
-        fields = 'name'
-        read_only_fields = 'name',
+        fields = '__all__'
+        read_only_fields = '__all__',
 
 
 class RecipeSerializer(ModelSerializer):
@@ -182,23 +183,22 @@ class RecipeSerializer(ModelSerializer):
             'cooking_time',
         )
 
+        read_only_fields = (
+            'is_favorite',
+            'is_shopping_cart',
+        )
+
     def get_ingredients(self, recipe):
         """
         Получает список ингредиентов для рецепта recipe.
         """
-        ingredients = recipe.ingredient.values(
-            'ingredients__id',
-            'ingredients__name',
-            'ingredients__measurement_unit',
-            'amount',
+        ingredients = recipe.ingredients.values(
+            'id',
+            'name',
+            'measurement_unit',
+            amount=F('recipe__amount')
         )
-        return [
-            {
-                key.replace('ingredients__', ''):
-                val for key, val in ingredient.items()
-            }
-            for ingredient in ingredients
-        ]
+        return ingredients
 
     def get_is_favorited(self, obj):
         """

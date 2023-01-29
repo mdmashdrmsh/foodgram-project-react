@@ -172,3 +172,6 @@ class IngredientAmount(models.Model):
                 name='ingredient already added'
             ),
         )
+
+    def __str__(self):
+        return f'{self.amount} {self.ingredients}'

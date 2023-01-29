@@ -1,4 +1,5 @@
 from datetime import datetime as dt
+from urllib.parse import unquote
 
 from django.contrib.auth import get_user_model
 from django.db.models import F, Sum
@@ -11,7 +12,6 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from recipes.models import Ingredient, IngredientAmount, Recipe, Tag
 
-from .filters import AuthorAndTagFilter, IngredientSearchFilter
 from .mixins import AddDelViewMixin
 from .paginators import PageLimitPagination
 from .permissions import IsAdminOrReadOnly, IsAuthorStaffOrReadOnly
@@ -73,30 +73,28 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (IsAdminOrReadOnly,)
-    filter_backends = (IngredientSearchFilter,)
-    search_fields = ('^name',)
 
-    # def get_queryset(self):
-    #     """
-    #     Получает queryset в соответствии с параметрами запроса.
-    #     Ищет объекты по совпадению в начале названия,
-    #     также добавляются результаты по совпадению в середине.
-    #     Прописные буквы преобразуются в строчные,
-    #     так как все ингредиенты в базе даны в нижнем регистре.
-    #     """
-    #     name = self.request.query_params.get('name')
-    #     queryset = self.queryset
-    #     if name:
-    #         if name[0] == '%':
-    #             name = unquote(name)
-    #         name = name.lower()
-    #         stw_queryset = list(queryset.filter(name__startswith=name))
-    #         cnt_queryset = queryset.filter(name__contains=name)
-    #         stw_queryset.extend(
-    #             [i for i in cnt_queryset if i not in stw_queryset]
-    #         )
-    #         queryset = stw_queryset
-    #     return queryset
+    def get_queryset(self):
+        """
+        Получает queryset в соответствии с параметрами запроса.
+        Ищет объекты по совпадению в начале названия,
+        также добавляются результаты по совпадению в середине.
+        Прописные буквы преобразуются в строчные,
+        так как все ингредиенты в базе даны в нижнем регистре.
+        """
+        name = self.request.query_params.get('name')
+        queryset = self.queryset
+        if name:
+            if name[0] == '%':
+                name = unquote(name)
+            name = name.lower()
+            stw_queryset = list(queryset.filter(name__startswith=name))
+            cnt_queryset = queryset.filter(name__contains=name)
+            stw_queryset.extend(
+                [i for i in cnt_queryset if i not in stw_queryset]
+            )
+            queryset = stw_queryset
+        return queryset
 
 
 class RecipeViewSet(ModelViewSet, AddDelViewMixin):
@@ -109,12 +107,11 @@ class RecipeViewSet(ModelViewSet, AddDelViewMixin):
     рецепт в избранное и в список покупок.
     Изменять рецепт может только автор или админ.
     """
-    queryset = Recipe.objects.all()
+    queryset = Recipe.objects.select_related('author')
     serializer_class = RecipeSerializer
     permission_classes = (IsAuthorStaffOrReadOnly,)
     pagination_class = PageLimitPagination
     add_serializer = ShortRecipeSerializer
-    filter_class = AuthorAndTagFilter
 
     def get_queryset(self):
         """
