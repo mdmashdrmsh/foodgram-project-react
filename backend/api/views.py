@@ -1,10 +1,8 @@
 from datetime import datetime as dt
-from urllib.parse import unquote
 
 from django.contrib.auth import get_user_model
 from django.db.models import F, Sum
 from django.http.response import HttpResponse
-from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -13,7 +11,7 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from recipes.models import Ingredient, IngredientAmount, Recipe, Tag
 
-from .filters import IngredientsFilter, RecipeFilter
+from .filters import AuthorAndTagFilter, IngredientSearchFilter
 from .mixins import AddDelViewMixin
 from .paginators import PageLimitPagination
 from .permissions import IsAdminOrReadOnly, IsAuthorStaffOrReadOnly
@@ -74,8 +72,9 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     """
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    filterset_class = IngredientsFilter
     permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (IngredientSearchFilter,)
+    search_fields = ('^name',)
 
     # def get_queryset(self):
     #     """
@@ -110,13 +109,12 @@ class RecipeViewSet(ModelViewSet, AddDelViewMixin):
     рецепт в избранное и в список покупок.
     Изменять рецепт может только автор или админ.
     """
-    queryset = Recipe.objects.select_related('author')
+    queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = (IsAuthorStaffOrReadOnly,)
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = RecipeFilter
     pagination_class = PageLimitPagination
     add_serializer = ShortRecipeSerializer
+    filter_class = AuthorAndTagFilter
 
     def get_queryset(self):
         """
