@@ -163,7 +163,7 @@ class RecipeViewSet(ModelViewSet, AddDelViewMixin):
     @action(methods=('get',), detail=False)
     def download_shopping_cart(self, request):
         """
-        Загржает файл *.txt со списком покупок
+        Загружает файл *.txt со списком покупок
         """
         TIME_FORMAT = '%d/%m/%Y %H:%M'
         user = self.request.user
@@ -172,17 +172,31 @@ class RecipeViewSet(ModelViewSet, AddDelViewMixin):
         ingredients = IngredientAmount.objects.filter(
             recipe__in=(user.shopping_list.values('id'))
         ).values(
-            ingredient=F('ingredients__name'),
+            name=F('ingredients__name'),
             measure=F('ingredients__measurement_unit')
         ).annotate(amount=Sum('amount'))
 
         filename = f'{user.username}_shopping_list.txt'
         shopping_list = (f'Список покупок для пользователя '
                          f'{user.first_name}:\n\n')
+        ingredients_set = {}
         for ing in ingredients:
-            shopping_list += (f'{ing["ingredient"]}:'
-                              f'{ing["amount"]} {ing["measure"]}\n')
+            name = ing['name']
+            amount = ing['amount']
+            measure = ing['measure']
+            if name not in ingredients_set:
+                ingredients_set[name] = {
+                    'amount': amount,
+                    'measure': measure,
+                }
+            else:
+                ingredients_set[name]['amount'] += amount
 
+        for name in ingredients_set:
+            shopping_list += (f"{name}: "
+                              f"{ingredients_set[name]['amount']}"
+                              f"{ingredients_set[name]['measure']}\n"
+            )
         shopping_list += (
             f'\nДата составления {dt.now().strftime(TIME_FORMAT)}.'
             '\n\nMade in Foodgram 2022 (c)'
@@ -193,3 +207,4 @@ class RecipeViewSet(ModelViewSet, AddDelViewMixin):
         )
         response['Content-Disposition'] = f'attachment; filename={filename}'
         return response
+
