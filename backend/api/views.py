@@ -169,7 +169,7 @@ class RecipeViewSet(ModelViewSet, AddDelViewMixin):
         user = self.request.user
         if not user.shopping_list.exists():
             return Response(status=HTTP_400_BAD_REQUEST)
-        ingredients = IngredientAmount.objects.filter(
+        ingredients = IngredientAmount.objegcts.filter(
             recipe__in=(user.shopping_list.values('id'))
         ).values(
             name=F('ingredients__name'),
