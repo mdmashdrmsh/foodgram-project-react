@@ -161,7 +161,7 @@ class IngredientAmount(models.Model):
         default=1,
         validators=(
             MinValueValidator(
-                1, 'Значение должно быть больше 0'
+                1, 'Количество ингредиента должно быть больше 0'
             ),
             MaxValueValidator(
                 1000, 'Слишком много для любого блюда'

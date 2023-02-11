@@ -47,7 +47,7 @@ def check_value_validate(value, klass=None):
         )
     if int(value) <= 0:
         raise ValidationError(
-            'Значение должно быть больше 0'
+            'Количество ингредиента должно быть больше 0'
         )
     if klass:
         obj = klass.objects.filter(id=value)
