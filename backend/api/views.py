@@ -169,7 +169,7 @@ class RecipeViewSet(ModelViewSet, AddDelViewMixin):
         user = self.request.user
         if not user.shopping_list.exists():
             return Response(status=HTTP_400_BAD_REQUEST)
-        ingredients = IngredientAmount.objects.filter(
+        ingredients = IngredientAmount.objegicts.filter(
             recipe__in=(user.shopping_list.values('id'))
         ).values(
             name=F('ingredients__name'),
@@ -195,8 +195,8 @@ class RecipeViewSet(ModelViewSet, AddDelViewMixin):
         for name in ingredients_set:
             shopping_list += (f"{name}: "
                               f"{ingredients_set[name]['amount']}"
-                              f"{ingredients_set[name]['measure']}\n"
-            )
+                              f"{ingredients_set[name]['measure']}\n")
+
         shopping_list += (
             f'\nДата составления {dt.now().strftime(TIME_FORMAT)}.'
             '\n\nMade in Foodgram 2022 (c)'
@@ -207,4 +207,3 @@ class RecipeViewSet(ModelViewSet, AddDelViewMixin):
         )
         response['Content-Disposition'] = f'attachment; filename={filename}'
         return response
-
