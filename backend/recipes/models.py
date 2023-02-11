@@ -146,13 +146,13 @@ class IngredientAmount(models.Model):
     Количество ингредиентов в конкретном рецепте
     """
     recipe = models.ForeignKey(
-        to=Recipe,
+        Recipe,
         on_delete=models.CASCADE,
         related_name='ingredient',
         verbose_name='В каких рецептах'
     )
     ingredients = models.ForeignKey(
-        to=Ingredient,
+        Ingredient,
         on_delete=models.CASCADE,
         related_name='recipe',
         verbose_name='Связанные ингредиенты',
@@ -161,7 +161,7 @@ class IngredientAmount(models.Model):
         default=1,
         validators=(
             MinValueValidator(
-                1, 'Из 1 ингредиента ничего не приготовить'
+                1, 'Значение должно быть больше 0'
             ),
             MaxValueValidator(
                 1000, 'Слишком много для любого блюда'
@@ -175,7 +175,7 @@ class IngredientAmount(models.Model):
         constraints = (
             models.UniqueConstraint(
                 fields=('recipe', 'ingredients', ),
-                name='ingredient already added'
+                name='ingredient_amount'
             ),
         )
 

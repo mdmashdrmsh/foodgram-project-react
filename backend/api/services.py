@@ -45,6 +45,10 @@ def check_value_validate(value, klass=None):
         raise ValidationError(
             f'{value} должно содержать цифру'
         )
+    if int(value) <= 0:
+        raise ValidationError(
+            'Значение должно быть больше 0'
+        )
     if klass:
         obj = klass.objects.filter(id=value)
         if not obj:

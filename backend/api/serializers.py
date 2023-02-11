@@ -250,7 +250,11 @@ class RecipeSerializer(ModelSerializer):
                     'amount': amount,
                 }
             )
-
+        if len(valid_ingredients) != len(
+               set(obj['ingredient'] for obj in valid_ingredients)):
+            raise ValidationError(
+                'Нельзя добавить один ингредиент более одного раза'
+            )
         data['name'] = name.capitalize()
         data['tags'] = tags
         data['ingredients'] = valid_ingredients
